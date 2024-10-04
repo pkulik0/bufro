@@ -2,10 +2,11 @@
 
 #include <memory>
 
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QMainWindow>
-#include <QtWidgets/QSystemTrayIcon>
-#include <QtWidgets/QMenu>
+#include <QApplication>
+#include <QMainWindow>
+#include <QSystemTrayIcon>
+#include <QMenu>
+#include <QHotkey>
 
 #include "capture.hxx"
 
@@ -34,4 +35,5 @@ public:
 private:
     std::unique_ptr<MainWindow> main_window_;
     std::unique_ptr<CaptureWidget> capture_widget_;
+    std::unique_ptr<QHotkey> hotkey_;
 };

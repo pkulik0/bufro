@@ -1,15 +1,19 @@
 #include "capture.hxx"
 
 #include <QPainter>
-#include <QTimer>
 #include <QApplication>
 
-CaptureWidget::CaptureWidget(QWidget *parent) : QWidget(parent), is_drawing_(false) {
-    setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+CaptureWidget::CaptureWidget(QWidget *parent) : QWidget(parent), is_drawing_(false), quit_hotkey_(std::make_unique<QHotkey>(QKeySequence("Escape"))) {
+    setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::ToolTip);
     setAttribute(Qt::WA_TranslucentBackground);
     setCursor(Qt::CrossCursor);
-    show();
-    activateWindow();
+    setFocusPolicy(Qt::StrongFocus);
+
+    connect(quit_hotkey_.get(), &QHotkey::activated, this, &QWidget::hide);
+}
+
+auto CaptureWidget::hideEvent(QHideEvent *event) -> void {
+    quit_hotkey_->setRegistered(false);
 }
 
 auto CaptureWidget::mousePressEvent(QMouseEvent *event) -> void {
@@ -51,10 +55,19 @@ auto CaptureWidget::paintEvent(QPaintEvent *event) -> void {
 auto CaptureWidget::showEvent(QShowEvent *event) -> void {
     QWidget::showEvent(event);
 
-    // Set the widget geometry to cover all screens
-    QRect totalScreenGeometry;
+    QRect geom;
     for (const auto* screen : QApplication::screens()) {
-        totalScreenGeometry = totalScreenGeometry.united(screen->geometry());
+        geom = geom.united(screen->geometry());
     }
-    setGeometry(totalScreenGeometry);
+    setGeometry(geom);
+
+    quit_hotkey_->setRegistered(true);
+}
+
+auto CaptureWidget::toggle() -> void {
+    if (isVisible()) {
+        hide();
+    } else {
+        show();
+    }
 }

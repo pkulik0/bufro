@@ -15,6 +15,8 @@ MainWindow::MainWindow() : QMainWindow(nullptr), trayIcon_(std::make_unique<Tray
 
 }
 
-Application::Application(int argc, char** argv) : QApplication(argc, argv), main_window_(std::make_unique<MainWindow>()), capture_widget_(std::make_unique<CaptureWidget>()) {
-    // mainWindow_->show();
+Application::Application(int argc, char** argv)
+    : QApplication(argc, argv), main_window_(std::make_unique<MainWindow>()), capture_widget_(std::make_unique<CaptureWidget>()),
+hotkey_(std::make_unique<QHotkey>(QKeySequence("Ctrl+Shift+O"), true)) {
+    connect(hotkey_.get(), &QHotkey::activated, capture_widget_.get(), &CaptureWidget::toggle);
 }
