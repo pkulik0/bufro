@@ -21,5 +21,5 @@ private:
     bool is_drawing_;
 
     std::unique_ptr<QHotkey> quit_hotkey_;
-    auto capture() const -> void;
+    auto capture() -> void;
 };

@@ -1,10 +1,16 @@
 package main
 
 import (
+	"context"
+
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
+	"github.com/pkulik0/bufro/api/internal/bufro"
+	"github.com/pkulik0/bufro/api/internal/config"
 	"github.com/pkulik0/bufro/api/internal/server"
+	"github.com/pkulik0/bufro/api/internal/store"
+	"github.com/pkulik0/bufro/api/internal/version"
 )
 
 func init() {
@@ -13,7 +19,17 @@ func init() {
 }
 
 func main() {
-	s := server.NewServer()
+	config.Parse()
+	version.EnsureSet()
+
+	st, err := store.NewPgStore(context.Background())
+	if err != nil {
+		log.Fatal().Err(err).Msg("store init failed")
+	}
+
+	b := bufro.NewBufro(st)
+
+	s := server.NewServer(b)
 	if err := s.Start(8080); err != nil {
 		log.Fatal().Err(err).Msg("server failed")
 	}

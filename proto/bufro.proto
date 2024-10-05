@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "github.com/pkulik0/bufro/api/internal/pb";
+
+enum BufType {
+    BUF_TYPE_UNKNOWN = 0;
+    BUF_TYPE_IMAGE = 1;
+    BUF_TYPE_VIDEO = 2;
+}
+
+message CreateBufRequest {
+    BufType type = 1;
+    bytes data = 2;
+    string token = 3;
+}
+
+message CreateBufResponse {
+    string id = 1;
+}
+
+message Error {
+    string message = 1;
+}

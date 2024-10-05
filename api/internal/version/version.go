@@ -1,18 +1,21 @@
 package version
 
 import (
+	_ "embed"
+	"strings"
+
 	"github.com/rs/zerolog/log"
 )
 
 var (
 	// Version is the commit hash or tag
-	Version string = ""
+	//go:embed version.txt
+	Version string
 	// BuildTime is the time of the build
 	BuildTime string = ""
 )
 
 type info struct {
-	Message   string `json:"message"`
 	Version   string `json:"version"`
 	BuildTime string `json:"build_time"`
 }
@@ -24,14 +27,15 @@ func Information() info {
 	}
 }
 
-func mustBeSet(vars ...string) {
+func checkAndTrim(vars ...*string) {
 	for _, s := range vars {
-		if s == "" {
+		*s = strings.Trim(*s, " \t\n")
+		if *s == "" {
 			log.Fatal().Msg("compile time variable not set")
 		}
 	}
 }
 
-func init() {
-	mustBeSet(Version, BuildTime)
+func EnsureSet() {
+	checkAndTrim(&Version, &BuildTime)
 }
