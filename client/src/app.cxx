@@ -30,10 +30,11 @@ TrayMenu::TrayMenu(QWidget *parent) : QMenu(parent) {
     });
 
     addAction(about_action_.get());
+    addSeparator();
     addAction(login_action_.get());
     addAction(quit_action_.get());
 
-    Auth::instance().load();
+    // Auth::instance().load();
 }
 
 TrayIcon::TrayIcon(QWidget *parent) : QSystemTrayIcon(parent), tray_menu_(std::make_unique<TrayMenu>()) {

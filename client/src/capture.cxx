@@ -54,7 +54,7 @@ auto CaptureWidget::capture() const -> void {
     QByteArray bytes;
     QBuffer buffer(&bytes);
     buffer.open(QIODevice::WriteOnly);
-    pixmap.save(&buffer, "PNG");
+    pixmap.save(&buffer, "WEBP");
 
     CreateBufRequest request;
     request.set_data(bytes.constData(), bytes.size());
@@ -63,7 +63,8 @@ auto CaptureWidget::capture() const -> void {
     const auto data = request.SerializeAsString();
     qDebug() << "Sending" << data.size() << "bytes";
 
-    QNetworkRequest req(QUrl(BASE_API_URL.c_str()));
+    const auto url = BASE_API_URL + "bufs";
+    QNetworkRequest req(QUrl(url.data()));
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-protobuf");
 
     Network::instance().post(req, QByteArray::fromStdString(data), [](auto* reply) {
