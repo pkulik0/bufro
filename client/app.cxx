@@ -4,15 +4,28 @@
 #include <QLineEdit>
 #include <QPushButton>
 
-#include "api.hxx"
+#include "network.hxx"
 
 TrayMenu::TrayMenu(QWidget *parent) : QMenu(parent) {
     connect(quit_action_.get(), &QAction::triggered, [] { qApp->quit(); });
-    connect(login_action_.get(), &QAction::triggered, [this] { Network::instance().login(); });
+    connect(login_action_.get(), &QAction::triggered, [] { Auth::instance().login(); });
+    connect(logout_action_.get(), &QAction::triggered, [] { Auth::instance().logout(); });
+    connect(&Auth::instance(), &Auth::authorized, [this] {
+        removeAction(login_action_.get());
+        insertAction(quit_action_.get(), logout_action_.get());
+        insertSeparator(quit_action_.get());
+    });
+    connect(&Auth::instance(), &Auth::logged_out, [this] {
+        removeAction(logout_action_.get());
+        insertAction(quit_action_.get(), login_action_.get());
+        insertSeparator(quit_action_.get());
+    });
 
     addAction(login_action_.get());
     addSeparator();
     addAction(quit_action_.get());
+
+    Auth::instance().load();
 }
 
 TrayIcon::TrayIcon(QWidget *parent) : QSystemTrayIcon(parent), tray_menu_(std::make_unique<TrayMenu>()) {

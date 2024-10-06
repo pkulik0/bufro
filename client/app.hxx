@@ -10,14 +10,17 @@
 #include "capture.hxx"
 
 class TrayMenu final : public QMenu {
+    Q_OBJECT
 public:
     explicit TrayMenu(QWidget *parent = nullptr);
 private:
     std::unique_ptr<QAction> quit_action_{std::make_unique<QAction>("Quit", this)};
     std::unique_ptr<QAction> login_action_{std::make_unique<QAction>("Login", this)};
+    std::unique_ptr<QAction> logout_action_{std::make_unique<QAction>("Logout", this)};
 };
 
 class TrayIcon final : public QSystemTrayIcon {
+    Q_OBJECT
 public:
     explicit TrayIcon(QWidget *parent = nullptr);
 private:
@@ -25,6 +28,7 @@ private:
 };
 
 class MainWindow final : public QMainWindow {
+    Q_OBJECT
 public:
     MainWindow();
 private:
@@ -32,6 +36,7 @@ private:
 };
 
 class Application final : public QApplication {
+    Q_OBJECT
 public:
     Application(int argc, char** argv);
 private:

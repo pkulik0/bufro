@@ -7,7 +7,7 @@
 
 
 #include "pb/bufro.pb.h"
-#include "api.hxx"
+#include "network.hxx"
 
 CaptureWidget::CaptureWidget(QWidget *parent) : QWidget(parent) {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::ToolTip);
@@ -55,25 +55,32 @@ auto CaptureWidget::capture() const -> void {
     QBuffer buffer(&bytes);
     buffer.open(QIODevice::WriteOnly);
     pixmap.save(&buffer, "PNG");
-    qDebug() << "Captured" << bytes.size() << "bytes";
 
     CreateBufRequest request;
     request.set_data(bytes.constData(), bytes.size());
     request.set_type(BUF_TYPE_IMAGE);
 
-    // send to localhost:8080/b
     const auto data = request.SerializeAsString();
     qDebug() << "Sending" << data.size() << "bytes";
 
-    QNetworkRequest req(QUrl("http://localhost:8080/b"));
+    const auto endpoint = BASE_API_URL + "/b";
+    QNetworkRequest req(QUrl(endpoint.c_str()));
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-protobuf");
 
     Network::instance().post(req, QByteArray::fromStdString(data), [](auto* reply) {
         if (reply->error() != QNetworkReply::NoError) {
             qDebug() << "Error:" << reply->errorString();
-        } else {
-            qDebug() << "Success:" << reply->readAll();
+            return;
         }
+
+        const QByteArray resp = reply->readAll();
+
+        CreateBufResponse response;
+        response.ParseFromArray(resp.constData(), static_cast<int>(resp.size()));
+
+        qDebug() << "Created buf: " << response.id();
+        const auto bufUrl = BASE_API_URL + "/b/" + response.id();
+        QDesktopServices::openUrl(QUrl(bufUrl.data()));
     }, true);
 }
 
