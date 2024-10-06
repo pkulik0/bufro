@@ -68,3 +68,18 @@ func (mr *MockStoreMockRecorder) GetBuf(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBuf", reflect.TypeOf((*MockStore)(nil).GetBuf), arg0, arg1)
 }
+
+// GetUserBufs mocks base method.
+func (m *MockStore) GetUserBufs(arg0 context.Context, arg1 string, arg2, arg3 int) ([]model.Buf, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserBufs", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].([]model.Buf)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserBufs indicates an expected call of GetUserBufs.
+func (mr *MockStoreMockRecorder) GetUserBufs(arg0, arg1, arg2, arg3 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserBufs", reflect.TypeOf((*MockStore)(nil).GetUserBufs), arg0, arg1, arg2, arg3)
+}

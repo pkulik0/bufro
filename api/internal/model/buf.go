@@ -1,6 +1,9 @@
 package model
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"github.com/pkulik0/bufro/api/internal/pb"
+)
 
 type BufType string
 
@@ -22,6 +25,7 @@ type Buf struct {
 	UserID string
 }
 
+// NewBuf creates a new Buf instance.
 func NewBuf(userID string, type_ BufType, data []byte) *Buf {
 	id := uuid.New().String()[:8]
 	return &Buf{
@@ -29,5 +33,14 @@ func NewBuf(userID string, type_ BufType, data []byte) *Buf {
 		Type:   type_,
 		Data:   data,
 		UserID: userID,
+	}
+}
+
+func (b *Buf) ToProto() *pb.Buf {
+	return &pb.Buf{
+		Id:     b.ID,
+		Type:   InternalToPbType(b.Type),
+		Data:   b.Data,
+		UserId: b.UserID,
 	}
 }

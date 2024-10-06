@@ -45,7 +45,7 @@ func (s *server) handlerCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	uid := getUID(r)
-	buf := model.NewBuf(uid, pbToInternalType(req.Type), req.Data)
+	buf := model.NewBuf(uid, model.PbToInternalType(req.Type), req.Data)
 	err = s.b.CreateBuf(r.Context(), buf)
 	if err != nil {
 		nilOrErr(w, err, "failed to create buf", http.StatusInternalServerError)
@@ -53,6 +53,29 @@ func (s *server) handlerCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respond(w, &pb.CreateBufResponse{Id: buf.ID})
+}
+
+func (s *server) handlerGetUserBufs(w http.ResponseWriter, r *http.Request) {
+	var req pb.GetUserBufsRequest
+	err := readReq(r, &req)
+	if err != nil {
+		nilOrErr(w, err, "failed to read request", http.StatusBadRequest)
+		return
+	}
+
+	uid := getUID(r)
+	bufs, err := s.b.GetUserBufs(r.Context(), uid, int(req.Limit), int(req.Offset))
+	if err != nil {
+		nilOrErr(w, err, "failed to get user bufs", http.StatusInternalServerError)
+		return
+	}
+
+	pbBufs := make([]*pb.Buf, 0, len(bufs))
+	for i, buf := range bufs {
+		pbBufs[i] = buf.ToProto()
+	}
+
+	respond(w, &pb.GetUserBufsResponse{Bufs: pbBufs})
 }
 
 func (s *server) handlerGet(w http.ResponseWriter, r *http.Request) {
@@ -71,9 +94,10 @@ func (s *server) handlerGet(w http.ResponseWriter, r *http.Request) {
 func (s *server) Start(port int) error {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/{$}", s.handlerRoot)
-	mux.Handle("POST /b", authMiddleware(s.a, http.HandlerFunc(s.handlerCreate)))
-	mux.HandleFunc("GET /b/{id}", s.handlerGet)
+	mux.HandleFunc("GET /{$}", s.handlerRoot)
+	mux.Handle("POST /{$}", authMiddleware(s.a, http.HandlerFunc(s.handlerCreate)))
+	mux.HandleFunc("GET /{id}", s.handlerGet)
+	mux.Handle("GET /bufs", authMiddleware(s.a, http.HandlerFunc(s.handlerGetUserBufs)))
 
 	addr := fmt.Sprintf(":%d", port)
 	log.Info().Str("addr", addr).Msg("starting server")

@@ -6,32 +6,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"google.golang.org/protobuf/proto"
-
-	"github.com/pkulik0/bufro/api/internal/model"
-	"github.com/pkulik0/bufro/api/internal/pb"
 )
-
-func pbToInternalType(t pb.BufType) model.BufType {
-	switch t {
-	case pb.BufType_BUF_TYPE_IMAGE:
-		return model.TypeImage
-	case pb.BufType_BUF_TYPE_VIDEO:
-		return model.TypeVideo
-	default:
-		return model.TypeUnknown
-	}
-}
-
-func internalToPbType(t model.BufType) pb.BufType {
-	switch t {
-	case model.TypeImage:
-		return pb.BufType_BUF_TYPE_IMAGE
-	case model.TypeVideo:
-		return pb.BufType_BUF_TYPE_VIDEO
-	default:
-		return pb.BufType_BUF_TYPE_UNKNOWN
-	}
-}
 
 func readReq[T proto.Message](req *http.Request, dest T) error {
 	data, err := io.ReadAll(req.Body)

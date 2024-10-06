@@ -16,6 +16,10 @@ import (
 type Bufro interface {
 	// GetBuf returns the buffer with the given ID and user ID.
 	GetBuf(ctx context.Context, bufId string) (*model.Buf, error)
+
+	// GetUserBufs returns the buffers of the user with the given ID.
+	GetUserBufs(ctx context.Context, userId string, limit, offset int) ([]model.Buf, error)
+
 	// CreateBuf creates a new buffer with the given ID and user ID.
 	CreateBuf(ctx context.Context, buf *model.Buf) error
 }
@@ -45,6 +49,21 @@ func (b *bufro) GetBuf(ctx context.Context, bufId string) (*model.Buf, error) {
 	}
 
 	return b.s.GetBuf(ctx, bufId)
+}
+
+func (b *bufro) GetUserBufs(ctx context.Context, userId string, limit, offset int) ([]model.Buf, error) {
+	if len(userId) != 8 {
+		return nil, ErrInvalidID
+	}
+
+	if limit < 0 || limit > 100 || offset < 0 {
+		return nil, errors.New("invalid limit or offset")
+	}
+	if limit == 0 {
+		limit = 25
+	}
+
+	return b.s.GetUserBufs(ctx, userId, limit, offset)
 }
 
 func (b *bufro) CreateBuf(ctx context.Context, buf *model.Buf) error {

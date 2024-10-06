@@ -12,6 +12,10 @@ import (
 type Store interface {
 	// GetBuf returns the buf with the given ID.
 	GetBuf(ctx context.Context, bufId string) (*model.Buf, error)
+
+	// GetUserBufs returns the bufs of the user with the given ID.
+	GetUserBufs(ctx context.Context, userId string, limit, offset int) ([]model.Buf, error)
+
 	// CreateBuf creates a new buf and returns its ID.
 	CreateBuf(ctx context.Context, buf *model.Buf) error
 }

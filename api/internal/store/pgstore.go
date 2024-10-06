@@ -52,6 +52,26 @@ func (s *pgStore) GetBuf(ctx context.Context, bufId string) (*model.Buf, error) 
 	return &buf, nil
 }
 
+func (s *pgStore) GetUserBufs(ctx context.Context, userId string, limit, offset int) ([]model.Buf, error) {
+	rows, err := s.conn.Query(ctx, "SELECT id, type, user_id, data FROM buf WHERE user_id = $1 LIMIT $2 OFFSET $3", userId, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var bufs []model.Buf
+	for rows.Next() {
+		var buf model.Buf
+		err = rows.Scan(&buf.ID, &buf.Type, &buf.UserID, &buf.Data)
+		if err != nil {
+			return nil, err
+		}
+		bufs = append(bufs, buf)
+	}
+
+	return bufs, nil
+}
+
 func (s *pgStore) CreateBuf(ctx context.Context, buf *model.Buf) error {
 	_, err := s.conn.Exec(ctx, "INSERT INTO buf (id, type, user_id, data) VALUES ($1, $2, $3, $4)", buf.ID, buf.Type, buf.UserID, buf.Data)
 	return err
