@@ -11,6 +11,17 @@ func (t BufType) String() string {
 	return string(t)
 }
 
+func (t BufType) MIME() string {
+	switch t {
+	case TypeImage:
+		return "image/png"
+	case TypeVideo:
+		return "video/mp4"
+	default:
+		return "unknown"
+	}
+}
+
 const (
 	TypeUnknown BufType = "unknown"
 	TypeImage   BufType = "image"

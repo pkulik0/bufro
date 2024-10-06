@@ -86,7 +86,7 @@ func (s *server) handlerGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "image/png")
+	w.Header().Set("Content-Type", buf.Type.MIME())
 	writeOrLog(w, buf.Data)
 }
 
@@ -95,8 +95,8 @@ func (s *server) Start(port int) error {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /{$}", s.handlerRoot)
-	mux.Handle("POST /{$}", authMiddleware(s.a, http.HandlerFunc(s.handlerCreate)))
 	mux.HandleFunc("GET /{id}", s.handlerGet)
+	mux.Handle("POST /bufs", authMiddleware(s.a, http.HandlerFunc(s.handlerCreate)))
 	mux.Handle("GET /bufs", authMiddleware(s.a, http.HandlerFunc(s.handlerGetUserBufs)))
 
 	addr := fmt.Sprintf(":%d", port)
