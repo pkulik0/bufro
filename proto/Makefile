@@ -2,9 +2,7 @@ default: clean go cxx
 
 GO_PB_PATH = ../api/internal/pb
 CXX_PB_PATH = ../client/pb
-
-check-path:
-	@if [ ! -f .gitmodules ]; then echo "Please run this command from the root directory of the repository."; exit 1; fi
+TS_PB_PATH = ../web/src/lib/pb
 
 deps:
 	@go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
