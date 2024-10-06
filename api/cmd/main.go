@@ -6,6 +6,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
+	"github.com/pkulik0/bufro/api/internal/auth"
 	"github.com/pkulik0/bufro/api/internal/bufro"
 	"github.com/pkulik0/bufro/api/internal/config"
 	"github.com/pkulik0/bufro/api/internal/server"
@@ -27,9 +28,14 @@ func main() {
 		log.Fatal().Err(err).Msg("store init failed")
 	}
 
+	a, err := auth.NewKeycloakAuth(context.Background())
+	if err != nil {
+		log.Fatal().Err(err).Msg("auth init failed")
+	}
+
 	b := bufro.NewBufro(st)
 
-	s := server.NewServer(b)
+	s := server.NewServer(b, a)
 	if err := s.Start(8080); err != nil {
 		log.Fatal().Err(err).Msg("server failed")
 	}

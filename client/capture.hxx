@@ -3,6 +3,7 @@
 #include <QHotkey>
 #include <QWidget>
 #include <QMouseEvent>
+#include <QPainter>
 
 class CaptureWidget final : public QWidget {
 public:
@@ -16,10 +17,15 @@ protected:
     auto showEvent(QShowEvent* event) -> void override;
     auto hideEvent(QHideEvent* event) -> void override;
 private:
-    QPoint start_;
-    QPoint end_;
-    bool is_drawing_;
+    QPoint start_{};
+    QPoint end_{};
+    bool is_drawing_{false};
 
-    std::unique_ptr<QHotkey> quit_hotkey_;
-    auto capture() -> void;
+    QBrush fill_brush_{QColor(50, 100, 200, 50)};
+    QPen border_pen_{QColor(50, 100, 200, 255), 2};
+    QBrush overlay_brush_{QColor(0, 0, 0, 100)};
+
+    std::unique_ptr<QHotkey> quit_hotkey_{std::make_unique<QHotkey>(QKeySequence("Escape"))};
+
+    auto capture() const -> void;
 };

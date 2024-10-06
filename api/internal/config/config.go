@@ -18,6 +18,11 @@ var (
 	PostgresPassword string
 	// PostgresDB is the name of the Postgres database
 	PostgresDB string
+
+	// KeycloakURL is the URL of the Keycloak server
+	KeycloakURL string
+	// KeycloakRealm is the realm of the Keycloak server
+	KeycloakRealm string
 )
 
 const (
@@ -50,4 +55,7 @@ func Parse() {
 	PostgresUser = getEnv("POSTGRES_USER", "bufro", false)
 	PostgresPassword = getEnv("POSTGRES_PASSWORD", "postgres", true)
 	PostgresDB = getEnv("POSTGRES_DB", "bufro", false)
+
+	KeycloakURL = getEnv("KEYCLOAK_URL", "http://keycloak:8080", false)
+	KeycloakRealm = getEnv("KEYCLOAK_REALM", "bufro", false)
 }

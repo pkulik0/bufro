@@ -25,7 +25,7 @@ func TestHandler(t *testing.T) {
 					ID:     "abc",
 					Type:   model.TypeImage,
 					Data:   []byte{1, 2, 3},
-					UserID: 123,
+					UserID: "123",
 				}
 				b.EXPECT().GetBuf(gomock.Any(), "abc").Return(buf, nil)
 			},
@@ -64,7 +64,8 @@ func TestHandler(t *testing.T) {
 			ctrl := gomock.NewController(c)
 
 			b := mock.NewMockBufro(ctrl)
-			s := NewServer(b)
+			a := mock.NewMockAuth(ctrl)
+			s := NewServer(b, a)
 
 			tc.setup(b)
 			tc.call(c, s)

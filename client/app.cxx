@@ -1,7 +1,18 @@
 #include "app.hxx"
 
+#include <QVBoxLayout>
+#include <QLineEdit>
+#include <QPushButton>
+
+#include "api.hxx"
+
 TrayMenu::TrayMenu(QWidget *parent) : QMenu(parent) {
-    addAction("Quit", []() { QApplication::quit(); });
+    connect(quit_action_.get(), &QAction::triggered, [] { qApp->quit(); });
+    connect(login_action_.get(), &QAction::triggered, [this] { Network::instance().login(); });
+
+    addAction(login_action_.get());
+    addSeparator();
+    addAction(quit_action_.get());
 }
 
 TrayIcon::TrayIcon(QWidget *parent) : QSystemTrayIcon(parent), tray_menu_(std::make_unique<TrayMenu>()) {

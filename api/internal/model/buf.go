@@ -19,10 +19,10 @@ type Buf struct {
 	ID     string
 	Type   BufType
 	Data   []byte
-	UserID uint64
+	UserID string
 }
 
-func NewBuf(userID uint64, type_ BufType, data []byte) *Buf {
+func NewBuf(userID string, type_ BufType, data []byte) *Buf {
 	id := uuid.New().String()[:8]
 	return &Buf{
 		ID:     id,

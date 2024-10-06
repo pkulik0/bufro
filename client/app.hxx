@@ -6,13 +6,15 @@
 #include <QMainWindow>
 #include <QSystemTrayIcon>
 #include <QMenu>
-#include <QHotkey>
 
 #include "capture.hxx"
 
 class TrayMenu final : public QMenu {
 public:
     explicit TrayMenu(QWidget *parent = nullptr);
+private:
+    std::unique_ptr<QAction> quit_action_{std::make_unique<QAction>("Quit", this)};
+    std::unique_ptr<QAction> login_action_{std::make_unique<QAction>("Login", this)};
 };
 
 class TrayIcon final : public QSystemTrayIcon {

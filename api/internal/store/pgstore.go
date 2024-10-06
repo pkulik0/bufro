@@ -29,7 +29,7 @@ func NewPgStore(ctx context.Context) (*pgStore, error) {
 		return nil, err
 	}
 
-	_, err = conn.Exec(ctx, "CREATE TABLE IF NOT EXISTS buf (id TEXT PRIMARY KEY, type VARCHAR(8), user_id INT, data BYTEA);")
+	_, err = conn.Exec(ctx, "CREATE TABLE IF NOT EXISTS buf (id TEXT PRIMARY KEY, type VARCHAR(8), user_id TEXT, data BYTEA);")
 	if err != nil {
 		return nil, err
 	}
