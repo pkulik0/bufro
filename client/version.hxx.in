@@ -1,0 +1,4 @@
+#pragma once
+
+#define VERSION "@VERSION@"
+#define BUILD_TIME "@BUILD_TIME@"

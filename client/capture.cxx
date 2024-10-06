@@ -63,8 +63,7 @@ auto CaptureWidget::capture() const -> void {
     const auto data = request.SerializeAsString();
     qDebug() << "Sending" << data.size() << "bytes";
 
-    const auto endpoint = BASE_API_URL + "/b";
-    QNetworkRequest req(QUrl(endpoint.c_str()));
+    QNetworkRequest req(QUrl(BASE_API_URL.c_str()));
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-protobuf");
 
     Network::instance().post(req, QByteArray::fromStdString(data), [](auto* reply) {
@@ -78,8 +77,8 @@ auto CaptureWidget::capture() const -> void {
         CreateBufResponse response;
         response.ParseFromArray(resp.constData(), static_cast<int>(resp.size()));
 
-        qDebug() << "Created buf: " << response.id();
-        const auto bufUrl = BASE_API_URL + "/b/" + response.id();
+        qDebug() << "Created buf:" << response.id();
+        const auto bufUrl = BASE_API_URL + response.id();
         QDesktopServices::openUrl(QUrl(bufUrl.data()));
     }, true);
 }
