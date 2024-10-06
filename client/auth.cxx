@@ -16,10 +16,9 @@ auto Auth::login() const -> void {
 }
 
 auto Auth::logout() -> void {
-    oauth2_->setToken("");
-    oauth2_->setRefreshToken("");
+    oauth2_->setToken(QString());
+    oauth2_->setRefreshToken(QString());
     oauth2_->expirationAtChanged(QDateTime());
-
     clear();
     emit logged_out();
 }

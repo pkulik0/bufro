@@ -7,7 +7,11 @@
 
 class CaptureWidget final : public QWidget {
 public:
-    explicit CaptureWidget(QWidget* parent = nullptr);
+    static CaptureWidget& instance() {
+        static CaptureWidget instance;
+        return instance;
+    }
+
     auto toggle() -> void;
 protected:
     auto mousePressEvent(QMouseEvent* event) -> void override;
@@ -26,6 +30,8 @@ private:
     QBrush overlay_brush_{QColor(0, 0, 0, 100)};
 
     std::unique_ptr<QHotkey> quit_hotkey_{std::make_unique<QHotkey>(QKeySequence("Escape"))};
+
+    CaptureWidget();
 
     auto capture() const -> void;
 };

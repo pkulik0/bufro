@@ -9,7 +9,7 @@
 #include "pb/bufro.pb.h"
 #include "network.hxx"
 
-CaptureWidget::CaptureWidget(QWidget *parent) : QWidget(parent) {
+CaptureWidget::CaptureWidget() : QWidget(nullptr) {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::ToolTip);
     setAttribute(Qt::WA_TranslucentBackground);
     setCursor(Qt::CrossCursor);
