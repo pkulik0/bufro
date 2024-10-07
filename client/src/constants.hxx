@@ -3,9 +3,14 @@
 #include <string>
 #include <string_view>
 
+#ifdef DEBUG
 constexpr std::string BASE_API_URL = "http://localhost:8080/";
-
 constexpr std::string BASE_AUTH_URL = "http://localhost:8081/";
+#else
+constexpr std::string BASE_API_URL = "https://bufro.com/";
+constexpr std::string BASE_AUTH_URL = "https://sso.ony.sh/";
+#endif
+
 const std::string AUTH_LOGIN_URL = BASE_AUTH_URL + "realms/bufro/protocol/openid-connect/auth";
 const std::string AUTH_TOKEN_URL = BASE_AUTH_URL + "realms/bufro/protocol/openid-connect/token";
 const std::string AUTH_USER_INFO_URL = BASE_AUTH_URL + "realms/bufro/protocol/openid-connect/userinfo";
@@ -13,4 +18,4 @@ const std::string AUTH_USER_INFO_URL = BASE_AUTH_URL + "realms/bufro/protocol/op
 constexpr std::string_view AUTH_CLIENT_ID = "app";
 constexpr std::string_view AUTH_CLIENT_SECRET = "YITlLPjL8kpXynn6qIPOaEWIXwHlHavo";
 
-constexpr std::string_view ICON_PATH = "/Users/pkulik/repos/bufro/client/assets/icon.png";
+constexpr std::string_view ICON_PATH = ":/assets/icon.png";
