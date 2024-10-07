@@ -14,7 +14,7 @@ func (t BufType) String() string {
 func (t BufType) MIME() string {
 	switch t {
 	case TypeImage:
-		return "image/png"
+		return "image/webp"
 	case TypeVideo:
 		return "video/mp4"
 	default:

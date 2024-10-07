@@ -22,5 +22,7 @@ deps:
 generate: deps
 	@go generate ./...
 
+OCI_TAG = ghcr.io/pkulik0/bufro/api:latest
 oci: version
-	@docker build -t ghcr.io/pkulik0/bufro/api:latest .
+	@docker build --platform linux/amd64 -t $(OCI_TAG) .
+	@docker push $(OCI_TAG)

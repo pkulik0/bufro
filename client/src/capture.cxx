@@ -60,14 +60,11 @@ auto CaptureWidget::capture() const -> void {
     request.set_data(bytes.constData(), bytes.size());
     request.set_type(BUF_TYPE_IMAGE);
 
-    const auto data = request.SerializeAsString();
-    qDebug() << "Sending" << data.size() << "bytes";
-
     const auto url = BASE_API_URL + "bufs";
     QNetworkRequest req(QUrl(url.data()));
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-protobuf");
 
-    Network::instance().post(req, QByteArray::fromStdString(data), [](auto* reply) {
+    Network::instance().post(req, QByteArray::fromStdString(request.SerializeAsString()), [](auto* reply) {
         if (reply->error() != QNetworkReply::NoError) {
             qDebug() << "Error:" << reply->errorString();
             return;
@@ -109,6 +106,7 @@ auto CaptureWidget::showEvent(QShowEvent *event) -> void {
         geom = geom.united(screen->geometry());
     }
     setGeometry(geom);
+    setFixedSize(geom.size());
 
     quit_hotkey_->setRegistered(true);
 }

@@ -39,10 +39,10 @@ auto Auth::get_token() const -> QString {
 }
 
 auto Auth::load() -> void {
-    const auto token = Settings::instance().get("token").toString();
     const auto refresh_token = Settings::instance().get("refresh_token").toString();
+    if (refresh_token.isEmpty()) return;
+    const auto token = Settings::instance().get("token").toString();
     const auto expiration_at = Settings::instance().get("expiration_at").toDateTime();
-    if (token.isEmpty() || refresh_token.isEmpty() || expiration_at.isNull()) return;
 
     qDebug() << "Using existing credentials";
     oauth2_->setToken(token);
@@ -96,6 +96,13 @@ Auth::Auth() : QObject(nullptr) {
     oauth2_->setClientIdentifierSharedKey(AUTH_CLIENT_SECRET.data());
     oauth2_->setScope("openid profile");
     oauth2_->setReplyHandler(replyHandler_.get());
+
+    // set access type to offline
+    oauth2_->setModifyParametersFunction([this](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* parameters) {
+        if (stage == QAbstractOAuth::Stage::RequestingAuthorization) {
+            parameters->insert("access_type", "offline");
+        }
+    });
 
     connect(oauth2_.get(), &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, &QDesktopServices::openUrl);
     connect(oauth2_.get(), &QOAuth2AuthorizationCodeFlow::granted, [this] {
