@@ -3,6 +3,7 @@ package bufro
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 
@@ -43,8 +44,12 @@ var (
 	ErrInvalidBufType = errors.New("invalid buf type")
 )
 
+func isIdValid(id string) bool {
+	return strings.Contains(id, "-") && len(id) > 2
+}
+
 func (b *bufro) GetBuf(ctx context.Context, bufId string) (*model.Buf, error) {
-	if len(bufId) != 8 {
+	if !isIdValid(bufId) {
 		return nil, ErrInvalidID
 	}
 
@@ -52,7 +57,7 @@ func (b *bufro) GetBuf(ctx context.Context, bufId string) (*model.Buf, error) {
 }
 
 func (b *bufro) GetUserBufs(ctx context.Context, userId string, limit, offset int) ([]model.Buf, error) {
-	if len(userId) != 8 {
+	if !isIdValid(userId) {
 		return nil, ErrInvalidID
 	}
 
@@ -67,7 +72,7 @@ func (b *bufro) GetUserBufs(ctx context.Context, userId string, limit, offset in
 }
 
 func (b *bufro) CreateBuf(ctx context.Context, buf *model.Buf) error {
-	if len(buf.ID) != 8 {
+	if !isIdValid(buf.ID) {
 		return ErrInvalidID
 	}
 	if buf.Data == nil {

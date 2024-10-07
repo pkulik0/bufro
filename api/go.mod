@@ -4,9 +4,9 @@ go 1.23.0
 
 require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
+	github.com/dustinkirkland/golang-petname v0.0.0-20240428194347-eebcea082ee0
 	github.com/frankban/quicktest v1.14.6
 	github.com/golang-migrate/migrate/v4 v4.18.1
-	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/rs/zerolog v1.33.0
 	go.uber.org/mock v0.4.0

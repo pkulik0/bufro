@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/google/uuid"
+	petname "github.com/dustinkirkland/golang-petname"
 	"github.com/pkulik0/bufro/api/internal/pb"
 )
 
@@ -38,7 +38,7 @@ type Buf struct {
 
 // NewBuf creates a new Buf instance.
 func NewBuf(userID string, type_ BufType, data []byte) *Buf {
-	id := uuid.New().String()[:8]
+	id := petname.Generate(2, "-")
 	return &Buf{
 		ID:     id,
 		Type:   type_,
