@@ -3,3 +3,5 @@
 .idea
 build
 version.txt
+vcpkg_installed
+
