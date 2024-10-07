@@ -1,0 +1,8 @@
+{
+  "name": "bufro-client",
+  "dependencies": [
+    "protobuf",
+    "abseil"
+  ],
+  "version": "0"
+}
