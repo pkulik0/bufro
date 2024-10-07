@@ -3,6 +3,8 @@ package bufro
 import (
 	"context"
 	"errors"
+	"regexp"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 
@@ -43,8 +45,20 @@ var (
 	ErrInvalidBufType = errors.New("invalid buf type")
 )
 
+func isUidValid(uid string) bool {
+	return strings.Contains(uid, "-") && len(uid) > 10
+}
+
+var (
+	regexBufId = regexp.MustCompile(`^[a-zA-Z0-9]{8}$`)
+)
+
+func isBufIdValid(bufId string) bool {
+	return regexBufId.MatchString(bufId)
+}
+
 func (b *bufro) GetBuf(ctx context.Context, bufId string) (*model.Buf, error) {
-	if len(bufId) != 8 {
+	if !isBufIdValid(bufId) {
 		return nil, ErrInvalidID
 	}
 
@@ -52,7 +66,7 @@ func (b *bufro) GetBuf(ctx context.Context, bufId string) (*model.Buf, error) {
 }
 
 func (b *bufro) GetUserBufs(ctx context.Context, userId string, limit, offset int) ([]model.Buf, error) {
-	if len(userId) != 8 {
+	if !isUidValid(userId) {
 		return nil, ErrInvalidID
 	}
 
@@ -67,7 +81,7 @@ func (b *bufro) GetUserBufs(ctx context.Context, userId string, limit, offset in
 }
 
 func (b *bufro) CreateBuf(ctx context.Context, buf *model.Buf) error {
-	if len(buf.ID) != 8 {
+	if !isBufIdValid(buf.ID) {
 		return ErrInvalidID
 	}
 	if buf.Data == nil {

@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/google/uuid"
+
 	"github.com/pkulik0/bufro/api/internal/pb"
 )
 

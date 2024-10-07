@@ -3,13 +3,10 @@ VERSION = $(shell git describe --tags --always --dirty)
 BUILD_TIME = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 FLAGS = -ldflags "-X $(PKG)/internal/version.BuildTime=$(BUILD_TIME)"
 
-run: version
-	@go run $(FLAGS) ./cmd
-
 version:
 	@echo $(VERSION) > ./internal/version/version.txt
 
-build: version
+build:
 	@mkdir -p ./build
 	@go build $(FLAGS) -o ./build/api ./cmd
 
