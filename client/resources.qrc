@@ -2,5 +2,6 @@
 <RCC version="1.0">
     <qresource prefix="/">
         <file>assets/tray_icon.png</file>
+        <file>assets/app_icon.png</file>
     </qresource>
 </RCC>

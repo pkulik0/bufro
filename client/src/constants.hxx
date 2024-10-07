@@ -20,4 +20,5 @@ const std::string AUTH_USER_INFO_URL = BASE_AUTH_URL + "realms/" + AUTH_REALM + 
 constexpr std::string_view AUTH_CLIENT_ID = "bufro-client";
 constexpr std::string_view AUTH_CLIENT_SECRET = "3JdESuwZZgGV3rt019bDoOcIsLQuAcXL";
 
-constexpr std::string_view ICON_PATH = ":/assets/tray_icon.png";
+constexpr std::string_view TRAY_ICON_PATH = ":/assets/tray_icon.png";
+constexpr std::string_view APP_ICON_PATH = ":/assets/app_icon.png";

@@ -14,7 +14,7 @@ class AboutDialog final : public QDialog {
 public:
     explicit AboutDialog(QWidget *parent = nullptr) : QDialog(parent) {
         setWindowTitle("About Bufro");
-        setFixedSize(300, 200);
+        setFixedSize(300, 300);
         setWindowIcon(icon_);
 
         setLayout(main_layout_.get());
@@ -43,8 +43,8 @@ private:
     ptr<QWidget> central_widget_{std::make_unique<QWidget>()};
     ptr<QVBoxLayout> main_layout_{std::make_unique<QVBoxLayout>()};
 
-    QIcon icon_{ICON_PATH.data()};
-    QPixmap icon_pixmap_{icon_.pixmap(64, 64)};
+    QIcon icon_{APP_ICON_PATH.data()};
+    QPixmap icon_pixmap_{icon_.pixmap(128, 128)};
     ptr<QLabel> icon_label_{std::make_unique<QLabel>()};
 
     ptr<QVBoxLayout> info_layout_{std::make_unique<QVBoxLayout>()};

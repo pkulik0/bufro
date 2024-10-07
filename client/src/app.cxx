@@ -36,7 +36,7 @@ TrayMenu::TrayMenu(QWidget *parent) : QMenu(parent) {
 }
 
 TrayIcon::TrayIcon(QWidget *parent) : QSystemTrayIcon(parent), tray_menu_(std::make_unique<TrayMenu>()) {
-    setIcon(QIcon(ICON_PATH.data()));  // TODO: include icon in build
+    setIcon(QIcon(TRAY_ICON_PATH.data()));  // TODO: include icon in build
     setToolTip("Bufro");
     setContextMenu(tray_menu_.get());
     show();
