@@ -3,6 +3,7 @@ package bufro
 import (
 	"context"
 	"errors"
+	"regexp"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -44,12 +45,20 @@ var (
 	ErrInvalidBufType = errors.New("invalid buf type")
 )
 
-func isIdValid(id string) bool {
-	return strings.Contains(id, "-") && len(id) > 2
+func isUidValid(uid string) bool {
+	return strings.Contains(uid, "-") && len(uid) > 10
+}
+
+var (
+	regexBufId = regexp.MustCompile(`^[a-zA-Z0-9]{8}$`)
+)
+
+func isBufIdValid(bufId string) bool {
+	return regexBufId.MatchString(bufId)
 }
 
 func (b *bufro) GetBuf(ctx context.Context, bufId string) (*model.Buf, error) {
-	if !isIdValid(bufId) {
+	if !isBufIdValid(bufId) {
 		return nil, ErrInvalidID
 	}
 
@@ -57,7 +66,7 @@ func (b *bufro) GetBuf(ctx context.Context, bufId string) (*model.Buf, error) {
 }
 
 func (b *bufro) GetUserBufs(ctx context.Context, userId string, limit, offset int) ([]model.Buf, error) {
-	if !isIdValid(userId) {
+	if !isUidValid(userId) {
 		return nil, ErrInvalidID
 	}
 
@@ -72,7 +81,7 @@ func (b *bufro) GetUserBufs(ctx context.Context, userId string, limit, offset in
 }
 
 func (b *bufro) CreateBuf(ctx context.Context, buf *model.Buf) error {
-	if !isIdValid(buf.ID) {
+	if !isBufIdValid(buf.ID) {
 		return ErrInvalidID
 	}
 	if buf.Data == nil {
