@@ -12,7 +12,7 @@ var (
 	//go:embed version.txt
 	Version string
 	// BuildTime is the time of the build
-	BuildTime string = ""
+	BuildTime string
 )
 
 type info struct {
