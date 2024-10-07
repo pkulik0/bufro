@@ -1,6 +1,7 @@
 package server
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -90,11 +91,18 @@ func (s *server) handlerGet(w http.ResponseWriter, r *http.Request) {
 	writeOrLog(w, buf.Data)
 }
 
+//go:embed favicon.ico
+var favicon []byte
+
 // Start starts serving the API on the given port
 func (s *server) Start(port int) error {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /{$}", s.handlerRoot)
+	mux.HandleFunc("GET /favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/x-icon")
+		writeOrLog(w, favicon)
+	})
 	mux.HandleFunc("GET /{id}", s.handlerGet)
 	mux.Handle("POST /bufs", authMiddleware(s.a, http.HandlerFunc(s.handlerCreate)))
 	mux.Handle("GET /bufs", authMiddleware(s.a, http.HandlerFunc(s.handlerGetUserBufs)))
