@@ -94,15 +94,8 @@ Auth::Auth() : QObject(nullptr) {
     oauth2_->setAccessTokenUrl(QUrl(AUTH_TOKEN_URL.data()));
     oauth2_->setClientIdentifier(AUTH_CLIENT_ID.data());
     oauth2_->setClientIdentifierSharedKey(AUTH_CLIENT_SECRET.data());
-    oauth2_->setScope("openid profile");
+    oauth2_->setScope("openid profile offline_access");
     oauth2_->setReplyHandler(replyHandler_.get());
-
-    // set access type to offline
-    oauth2_->setModifyParametersFunction([this](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* parameters) {
-        if (stage == QAbstractOAuth::Stage::RequestingAuthorization) {
-            parameters->insert("access_type", "offline");
-        }
-    });
 
     connect(oauth2_.get(), &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, &QDesktopServices::openUrl);
     connect(oauth2_.get(), &QOAuth2AuthorizationCodeFlow::granted, [this] {

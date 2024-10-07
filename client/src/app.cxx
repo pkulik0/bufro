@@ -45,5 +45,5 @@ TrayIcon::TrayIcon(QWidget *parent) : QSystemTrayIcon(parent), tray_menu_(std::m
 Application::Application(int argc, char** argv)
     : QApplication(argc, argv), trayIcon_(std::make_unique<TrayIcon>(nullptr)), hotkey_(std::make_unique<QHotkey>(QKeySequence("Ctrl+Shift+O"), true)) {
     connect(hotkey_.get(), &QHotkey::activated, &CaptureWidget::instance(), &CaptureWidget::toggle);
-    // Auth::instance().load();
+    Auth::instance().load();
 }
