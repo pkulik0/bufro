@@ -2,9 +2,15 @@ package store
 
 import (
 	"context"
+	"database/sql"
+	"embed"
 	"fmt"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
+	_ "github.com/jackc/pgx/v5/stdlib"
+
 	"github.com/pkulik0/bufro/api/internal/config"
 	"github.com/pkulik0/bufro/api/internal/model"
 )
@@ -12,8 +18,11 @@ import (
 var _ Store = &pgStore{}
 
 type pgStore struct {
-	conn *pgx.Conn
+	db *sql.DB
 }
+
+//go:embed migrations/*.sql
+var migrationsFS embed.FS
 
 func NewPgStore(ctx context.Context) (*pgStore, error) {
 	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
@@ -24,28 +33,42 @@ func NewPgStore(ctx context.Context) (*pgStore, error) {
 		config.PostgresDB,
 	)
 
-	conn, err := pgx.Connect(ctx, url)
+	db, err := sql.Open("pgx", url)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = conn.Exec(ctx, "CREATE TABLE IF NOT EXISTS buf (id TEXT PRIMARY KEY, type VARCHAR(8), user_id TEXT, data BYTEA);")
+	f, err := iofs.New(migrationsFS, "migrations")
 	if err != nil {
+		return nil, err
+	}
+
+	psql, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		return nil, err
+	}
+
+	m, err := migrate.NewWithInstance("iofs", f, "postgres", psql)
+	if err != nil {
+		return nil, err
+	}
+	err = m.Up()
+	if err != nil && err != migrate.ErrNoChange {
 		return nil, err
 	}
 
 	return &pgStore{
-		conn: conn,
+		db: db,
 	}, nil
 }
 
-func (s *pgStore) Close(ctx context.Context) error {
-	return s.conn.Close(ctx)
+func (s *pgStore) Close() error {
+	return s.db.Close()
 }
 
 func (s *pgStore) GetBuf(ctx context.Context, bufId string) (*model.Buf, error) {
 	var buf model.Buf
-	err := s.conn.QueryRow(ctx, "SELECT id, type, user_id, data FROM buf WHERE id = $1", bufId).Scan(&buf.ID, &buf.Type, &buf.UserID, &buf.Data)
+	err := s.db.QueryRowContext(ctx, "SELECT id, type, user_id, data FROM buf WHERE id = $1", bufId).Scan(&buf.ID, &buf.Type, &buf.UserID, &buf.Data)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +76,7 @@ func (s *pgStore) GetBuf(ctx context.Context, bufId string) (*model.Buf, error) 
 }
 
 func (s *pgStore) GetUserBufs(ctx context.Context, userId string, limit, offset int) ([]model.Buf, error) {
-	rows, err := s.conn.Query(ctx, "SELECT id, type, user_id, data FROM buf WHERE user_id = $1 LIMIT $2 OFFSET $3", userId, limit, offset)
+	rows, err := s.db.QueryContext(ctx, "SELECT id, type, user_id, data FROM buf WHERE user_id = $1 LIMIT $2 OFFSET $3", userId, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -73,6 +96,6 @@ func (s *pgStore) GetUserBufs(ctx context.Context, userId string, limit, offset 
 }
 
 func (s *pgStore) CreateBuf(ctx context.Context, buf *model.Buf) error {
-	_, err := s.conn.Exec(ctx, "INSERT INTO buf (id, type, user_id, data) VALUES ($1, $2, $3, $4)", buf.ID, buf.Type, buf.UserID, buf.Data)
+	_, err := s.db.ExecContext(ctx, "INSERT INTO buf (id, type, user_id, data) VALUES ($1, $2, $3, $4)", buf.ID, buf.Type, buf.UserID, buf.Data)
 	return err
 }

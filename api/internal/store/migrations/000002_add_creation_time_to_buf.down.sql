@@ -1,0 +1,1 @@
+ALTER TABLE buf DROP COLUMN creation_time;

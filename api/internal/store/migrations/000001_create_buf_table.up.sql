@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS buf (id TEXT PRIMARY KEY, type VARCHAR(8), user_id TEXT, data BYTEA);
