@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <string_view>
 
 #ifdef DEBUG
 const std::string BASE_API_URL = "http://localhost:8080/";

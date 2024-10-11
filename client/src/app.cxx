@@ -42,8 +42,8 @@ TrayIcon::TrayIcon(QWidget *parent) : QSystemTrayIcon(parent), tray_menu_(std::m
     show();
 }
 
-Application::Application(int argc, char** argv)
-    : QApplication(argc, argv), trayIcon_(std::make_unique<TrayIcon>(nullptr)), hotkey_(std::make_unique<QHotkey>(QKeySequence("Ctrl+Shift+O"), true)) {
-    connect(hotkey_.get(), &QHotkey::activated, &CaptureWidget::instance(), &CaptureWidget::toggle);
+Application::Application(int argc, char** argv) : QApplication(argc, argv) {
+    connect(image_hotkey_.get(), &QHotkey::activated, &CaptureWidget::instance(), &CaptureWidget::toggle);
+    connect(video_hotkey_.get(), &QHotkey::activated, recorder_.get(), &ScreenRecorder::start);
     Auth::instance().load();
 }

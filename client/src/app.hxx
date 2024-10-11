@@ -3,12 +3,12 @@
 #include <memory>
 
 #include <QApplication>
-#include <QMainWindow>
 #include <QSystemTrayIcon>
 #include <QMenu>
 
 #include "about_dialog.hxx"
 #include "capture.hxx"
+#include "recorder.hxx"
 
 class TrayMenu final : public QMenu {
     Q_OBJECT
@@ -40,6 +40,8 @@ class Application final : public QApplication {
 public:
     Application(int argc, char** argv);
 private:
-    std::unique_ptr<TrayIcon> trayIcon_;
-    std::unique_ptr<QHotkey> hotkey_;
+    std::unique_ptr<TrayIcon> trayIcon_{std::make_unique<TrayIcon>()};
+    std::unique_ptr<QHotkey> image_hotkey_{std::make_unique<QHotkey>(QKeySequence("Ctrl+Shift+O"), true)};
+    std::unique_ptr<QHotkey> video_hotkey_{std::make_unique<QHotkey>(QKeySequence("Ctrl+Shift+E"), true)};
+    std::unique_ptr<ScreenRecorder> recorder_{std::make_unique<ScreenRecorder>(this)};
 };

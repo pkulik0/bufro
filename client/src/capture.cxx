@@ -5,7 +5,6 @@
 #include <QTimer>
 #include <QBuffer>
 
-
 #include "pb/bufro.pb.h"
 #include "network.hxx"
 

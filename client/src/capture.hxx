@@ -6,6 +6,7 @@
 #include <QPainter>
 
 class CaptureWidget final : public QWidget {
+    Q_OBJECT
 public:
     static CaptureWidget& instance() {
         static CaptureWidget instance;
