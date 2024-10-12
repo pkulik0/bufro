@@ -22,4 +22,3 @@ const std::string AUTH_CLIENT_SECRET = "3JdESuwZZgGV3rt019bDoOcIsLQuAcXL";
 const std::string TRAY_ICON_PATH = ":/assets/tray_icon.png";
 const std::string PAUSE_ICON_PATH = ":/assets/pause_icon.png";
 const std::string UPLOAD_ICON_PATH = ":/assets/upload_icon.png";
-const std::string APP_ICON_PATH = ":/assets/app_icon.png";

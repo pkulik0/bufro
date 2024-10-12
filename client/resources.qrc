@@ -4,6 +4,5 @@
         <file>assets/tray_icon.png</file>
         <file>assets/pause_icon.png</file>
         <file>assets/upload_icon.png</file>
-        <file>assets/app_icon.png</file>
     </qresource>
 </RCC>

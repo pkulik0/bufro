@@ -43,7 +43,7 @@ private:
     ptr<QWidget> central_widget_{std::make_unique<QWidget>()};
     ptr<QVBoxLayout> main_layout_{std::make_unique<QVBoxLayout>()};
 
-    QIcon icon_{APP_ICON_PATH.data()};
+    QIcon icon_{TRAY_ICON_PATH.data()};
     QPixmap icon_pixmap_{icon_.pixmap(128, 128)};
     ptr<QLabel> icon_label_{std::make_unique<QLabel>()};
 
