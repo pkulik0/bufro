@@ -7,8 +7,8 @@
 #include <QMenu>
 
 #include "about_dialog.hxx"
-#include "capture.hxx"
-#include "recorder.hxx"
+#include "capture_widget.hxx"
+#include "screen_capturer.hxx"
 
 class TrayMenu final : public QMenu {
     Q_OBJECT
@@ -29,9 +29,19 @@ private:
 class TrayIcon final : public QSystemTrayIcon {
     Q_OBJECT
 public:
-    explicit TrayIcon(QWidget *parent = nullptr);
+    static auto instance() -> TrayIcon& {
+        static TrayIcon instance;
+        return instance;
+    }
+
 private:
+    explicit TrayIcon(QWidget *parent = nullptr);
+
     std::unique_ptr<TrayMenu> tray_menu_;
+
+    QIcon icon_{QIcon(TRAY_ICON_PATH.data())};
+    QIcon pause_icon_{QIcon(PAUSE_ICON_PATH.data())};
+    QIcon upload_icon_{QIcon(UPLOAD_ICON_PATH.data())};
 };
 
 
@@ -40,8 +50,7 @@ class Application final : public QApplication {
 public:
     Application(int argc, char** argv);
 private:
-    std::unique_ptr<TrayIcon> trayIcon_{std::make_unique<TrayIcon>()};
+    TrayIcon& tray_icon_{TrayIcon::instance()};
     std::unique_ptr<QHotkey> image_hotkey_{std::make_unique<QHotkey>(QKeySequence("Ctrl+Shift+O"), true)};
     std::unique_ptr<QHotkey> video_hotkey_{std::make_unique<QHotkey>(QKeySequence("Ctrl+Shift+E"), true)};
-    std::unique_ptr<ScreenRecorder> recorder_{std::make_unique<ScreenRecorder>(this)};
 };

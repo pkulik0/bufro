@@ -1,12 +1,10 @@
-#include "capture.hxx"
+#include "capture_widget.hxx"
 
 #include <QPainter>
 #include <QApplication>
-#include <QTimer>
-#include <QBuffer>
 
 #include "pb/bufro.pb.h"
-#include "network.hxx"
+#include "screen_capturer.hxx"
 
 CaptureWidget::CaptureWidget() : QWidget(nullptr) {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::ToolTip);
@@ -14,7 +12,7 @@ CaptureWidget::CaptureWidget() : QWidget(nullptr) {
     setCursor(Qt::CrossCursor);
     setFocusPolicy(Qt::StrongFocus);
 
-    connect(quit_hotkey_.get(), &QHotkey::activated, this, &QWidget::hide);
+    connect(quit_hotkey_.get(), &QHotkey::activated, this, &CaptureWidget::close);
 }
 
 auto CaptureWidget::hideEvent(QHideEvent *event) -> void {
@@ -45,41 +43,31 @@ auto CaptureWidget::mouseReleaseEvent(QMouseEvent *event) -> void {
     QTimer::singleShot(200, this, &CaptureWidget::capture);
 }
 
-auto CaptureWidget::capture() const -> void {
+auto CaptureWidget::capture() -> void {
     auto* screen = QApplication::screenAt(start_);
     const auto rect = QRect(start_, end_).normalized();
-    const auto pixmap = screen->grabWindow(0, rect.x(), rect.y(), rect.width(), rect.height());
 
-    QByteArray bytes;
-    QBuffer buffer(&bytes);
-    buffer.open(QIODevice::WriteOnly);
-    pixmap.save(&buffer, "WEBP");
-
-    CreateBufRequest request;
-    request.set_data(bytes.constData(), bytes.size());
-    request.set_type(BUF_TYPE_IMAGE);
-
-    const auto url = BASE_API_URL + "bufs";
-    QNetworkRequest req(QUrl(url.data()));
-    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-protobuf");
-
-    Network::instance().post(req, QByteArray::fromStdString(request.SerializeAsString()), [](auto* reply) {
-        if (reply->error() != QNetworkReply::NoError) {
-            qDebug() << "Error:" << reply->errorString();
-            return;
+    switch(type_) {
+        case Type::IMAGE: {
+            ScreenCapturer::screenshot(screen, rect);
+            break;
         }
-
-        const QByteArray resp = reply->readAll();
-
-        CreateBufResponse response;
-        response.ParseFromArray(resp.constData(), static_cast<int>(resp.size()));
-
-        qDebug() << "Created buf:" << response.id();
-        const auto bufUrl = BASE_API_URL + response.id();
-        QDesktopServices::openUrl(QUrl(bufUrl.data()));
-    }, true);
+        case Type::VIDEO: {
+            ScreenCapturer::instance().start_recording(screen, rect);
+            break;
+        }
+        default: {
+            qDebug() << "Unknown capture type";
+            break;
+        }
+    }
+    type_ = Type::UNKNOWN;
 }
 
+auto CaptureWidget::close() -> void {
+    type_ = Type::UNKNOWN;
+    hide();
+}
 
 auto CaptureWidget::paintEvent(QPaintEvent *event) -> void {
     QPainter painter(this);
@@ -110,10 +98,18 @@ auto CaptureWidget::showEvent(QShowEvent *event) -> void {
     quit_hotkey_->setRegistered(true);
 }
 
-auto CaptureWidget::toggle() -> void {
+auto CaptureWidget::toggle(Type type) -> void {
+    if(type_ != Type::UNKNOWN && type_ != type) {
+        qDebug() << "Already capturing";
+        return;
+    }
+
     if (isVisible()) {
-        hide();
+        qDebug() << "Hiding capture";
+        close();
     } else {
+        qDebug() << "Showing capture";
         show();
+        type_ = type;
     }
 }

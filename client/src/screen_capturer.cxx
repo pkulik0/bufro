@@ -1,15 +1,17 @@
-#include "recorder.hxx"
+#include "screen_capturer.hxx"
 
 #include <QApplication>
-#include <QDesktopServices>
+#include <QBuffer>
 #include <QDir>
 #include <QTimer>
 
 #include <opencv2/opencv.hpp>
 
+#include "network.hxx"
+
 namespace fs = std::filesystem;
 
-auto ScreenRecorder::process() -> void {
+auto ScreenCapturer::crop() -> void {
     qDebug() << "Cropping captured video to:" << rect_;
 
     cv::VideoCapture cap(video_path_.toStdString());
@@ -42,30 +44,52 @@ auto ScreenRecorder::process() -> void {
         writer.write(cropped);
     }
 
-    qDebug() << "Finished processing";
+    qDebug() << "Finished processing" << cropped_path_;
     writer.release();
     cap.release();
+
+    upload();
+}
+
+auto ScreenCapturer::upload() -> void {
+    qDebug() << "Uploading" << cropped_path_;
+
+    QFile file(cropped_path_);
+    if(!file.open(QIODevice::ReadOnly)) {
+        qDebug() << "Failed to open" << cropped_path_;
+        cleanup();
+        return;
+    }
+
+    QByteArray bytes = file.readAll();
+    api::upload(BUF_TYPE_VIDEO, bytes);
 
     cleanup();
 }
 
-auto ScreenRecorder::cleanup() -> void {
+auto ScreenCapturer::cleanup() -> void {
     if(!fs::remove(video_path_.toStdString())) {
         qDebug() << "Failed to remove" << video_path_;
     }
     if(!fs::remove(cropped_path_.toStdString())) {
         qDebug() << "Failed to remove" << cropped_path_;
     }
-    is_recording_ = false;
+
+    emit processing_finished();
+    state_ = State::IDLE;
 }
 
-ScreenRecorder::ScreenRecorder(QObject *parent): QObject(parent) {
+ScreenCapturer::ScreenCapturer(QObject *parent): QObject(parent) {
     connect(recorder_.get(), &QMediaRecorder::errorOccurred, [](QMediaRecorder::Error error, const QString &errorString) {
         qDebug() << "Recorder error" << error << errorString;
     });
     connect(screen_capture_.get(), &QScreenCapture::errorOccurred, [](QScreenCapture::Error error, const QString &errorString) {
         qDebug() << "Screen capture error" << error << errorString;
     });
+
+    connect(&timer_, &QTimer::timeout, this, &ScreenCapturer::stop_recording);
+    timer_.setSingleShot(true);
+    timer_.setInterval(15000);;
 
     format_.setVideoCodec(QMediaFormat::VideoCodec::H265);
     format_.setAudioCodec(QMediaFormat::AudioCodec::AAC);
@@ -81,12 +105,20 @@ ScreenRecorder::ScreenRecorder(QObject *parent): QObject(parent) {
     session_->setScreenCapture(screen_capture_.get());
 }
 
-auto ScreenRecorder::start() -> void {
-    if(is_recording_) {
+auto ScreenCapturer::start_recording(QScreen* screen, QRect rect) -> void {
+    if(state_ != State::IDLE) {
         qDebug() << "Already recording";
         return;
     }
-    is_recording_ = true;
+    state_ = State::RECORDING;
+
+    const auto dpr = screen->devicePixelRatio();
+    const auto x = rect.x() * dpr;
+    const auto y = rect.y() * dpr;
+    const auto width = rect.width() * dpr;
+    const auto height = rect.height() * dpr;
+    rect_ = QRect(static_cast<int>(x), static_cast<int>(y), static_cast<int>(width), static_cast<int>(height));
+    screen_capture_->setScreen(screen);
 
     qDebug() << "Starting recording" << video_path_;
     recorder_->setOutputLocation(QUrl::fromLocalFile(video_path_));
@@ -94,14 +126,34 @@ auto ScreenRecorder::start() -> void {
     screen_capture_->start();
     recorder_->record();
 
-    QTimer::singleShot(5000, this, &ScreenRecorder::stop);
+    emit recording_started();
+    timer_.start();
 }
 
-auto ScreenRecorder::stop() -> void {
+auto ScreenCapturer::stop_recording() -> void {
+    if(state_ != State::RECORDING) {
+        qDebug() << "Not recording";
+        return;
+    }
+
     qDebug() << "Stopping recording";
 
     recorder_->stop();
     screen_capture_->stop();
 
-    QTimer::singleShot(500, this, &ScreenRecorder::process);
+    state_ = State::PROCESSING;
+    emit recording_stopped();
+    timer_.stop();
+
+    QTimer::singleShot(500, this, &ScreenCapturer::crop);
+}
+
+auto ScreenCapturer::screenshot(QScreen *screen, QRect rect) -> void {
+    const auto pixmap = screen->grabWindow(0, rect.x(), rect.y(), rect.width(), rect.height());
+    QByteArray bytes;
+    QBuffer buffer(&bytes);
+    buffer.open(QIODevice::WriteOnly);
+    pixmap.save(&buffer, "WEBP");
+
+    api::upload(BUF_TYPE_IMAGE, bytes);
 }

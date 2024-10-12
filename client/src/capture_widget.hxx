@@ -13,7 +13,11 @@ public:
         return instance;
     }
 
-    auto toggle() -> void;
+    enum class Type {
+        UNKNOWN, IMAGE, VIDEO
+    };
+
+    auto toggle(Type type) -> void;
 protected:
     auto mousePressEvent(QMouseEvent* event) -> void override;
     auto mouseMoveEvent(QMouseEvent* event) -> void override;
@@ -24,7 +28,9 @@ protected:
 private:
     QPoint start_{};
     QPoint end_{};
+
     bool is_drawing_{false};
+    Type type_{Type::UNKNOWN};
 
     QBrush fill_brush_{QColor(50, 100, 200, 50)};
     QPen border_pen_{QColor(50, 100, 200, 255), 2};
@@ -34,5 +40,6 @@ private:
 
     CaptureWidget();
 
-    auto capture() const -> void;
+    auto capture() -> void;
+    auto close() -> void;
 };
